@@ -62,10 +62,9 @@ flist: $(wildcard Makefile *.c *.h)
 AR=ar
 AS=as
 RANLIB=ranlib
-CC=mpicc
 
-FLAGS += $(MYFLAGS)
-CFLAGS += -O3 -w $(FLAGS)
+include ../compilers.inc
+
 CPPFLAGS=$(addprefix -I,.) \
   $(FLAGS)
 

@@ -10,35 +10,15 @@
 
 MODEL_SCR = hh_toy_true.c
 
-# Compiler (LAM: CC=hcc, CRAY T3E: CC=cc, SHARCNet: mpicc)
+include ../compilers.inc
 
-# ON Linux cluster running LAM
-CC=mpicc
-LFLAGS=-lm -lmpi -lcseife
-CFLAGS=-Wall -O4
+LFLAGS=
+ifeq ($(NONCRAY),1)
+  LFLAGS+=-L${FFTW_LIB}  
+endif
+LFLAGS+=-lm -lcseife
 SFLAGS=-L./../libcseife 
 IFLAGS=-I./../libcseife
-
-#Hermit
-#CC=cc
-#LFLAGS=-lm -lcseife
-#CFLAGS=-O3
-#SFLAGS=-L./../libcseife 
-#IFLAGS=-I./../libcseife
-
-# Juropa
-#CC=mpicc
-#LFLAGS=-lm -lcseife
-#CFLAGS=-Wall -O4 -ipo
-#SFLAGS=-L./../libcseife 
-#IFLAGS=-I./../libcseife
-
-# Jureka
-#CC=mpiicc
-#LFLAGS=-lm -lcseife
-#CFLAGS=-w -xhost -fast -ipo -pipe
-#SFLAGS=-L./../libcseife 
-#IFLAGS=-I./../libcseife
 
 
 # after this line, no further editing should be necessary
