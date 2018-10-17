@@ -4,19 +4,20 @@
 ## testcase. No profiling support available. 
 ##============================================================================
 
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --nodes=1
-#SBATCH -t 00:15:00
+#SBATCH --partition=debugq
+#SBATCH -t 01:00:00
 #SBATCH -J ifos3d_test
 #SBATCH --account=pawsey0001
 #SBATCH --export=NONE
 
-module load cray-fftw
+module load cray-hdf5
 
 # run forward simulation to obtain observed data
 make clean
 make install  MODEL=hh_toy_true.c
-srun -n 8 -N 1 --export=ALL ../bin/ifos3d ./in_and_out/ifos3d_toy_FW.json | tee ./in_and_out/ifos3D.out
+srun -n 16 -N 1 --export=ALL ../bin/ifos3d ./in_and_out/ifos3d_toy_FW.json | tee ./in_and_out/ifos3D.out
 
 cp model/toy.vs_it0 model/toy.vs.true
 cp model/toy.vp_it0 model/toy.vp.true
@@ -26,4 +27,4 @@ cp model/toy.rho_it0 model/toy.rho.true
 # invert observed data using homogeneous starting model
 make clean
 make install MODEL=hh_toy_start.c
-srun -n 8 -N 1 --export=ALL ../bin/ifos3d ./in_and_out/ifos3d_toy.json | tee ./in_and_out/ifos3D_INV.out
+srun -n 16 -N 1 --export=ALL ../bin/ifos3d ./in_and_out/ifos3d_toy.json | tee ./in_and_out/ifos3D_INV.out

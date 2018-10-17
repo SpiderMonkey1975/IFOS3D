@@ -68,10 +68,15 @@ void outgrad(int nx,int ny,int nz,float ***grad1, float ***grad2,float ***grad3,
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(MYID==0){
 		sprintf(gradfile4,"%s.vp_%4.2fHz_it%d",outfile,finv,iteration);
-		mergemod(gradfile4,3);
 		sprintf(gradfile5,"%s.vs_%4.2fHz_it%d",outfile,finv,iteration);
-		mergemod(gradfile5,3);
 		sprintf(gradfile6,"%s.rho_%4.2fHz_it%d",outfile,finv,iteration);
+#ifdef HDF5
+		mergemod_hdf5(gradfile4);
+		mergemod_hdf5(gradfile5);
+		mergemod_hdf5(gradfile6);
+#endif
+		mergemod(gradfile4,3);
+		mergemod(gradfile5,3);
 		mergemod(gradfile6,3);
 	}
 	MPI_Barrier(MPI_COMM_WORLD);

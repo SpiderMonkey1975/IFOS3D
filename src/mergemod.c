@@ -24,32 +24,23 @@
  *  ----------------------------------------------------------------------*/
 
 #include "fd.h"
-
+#include <hdf5.h>
 
 void mergemod(char modfile[STRING_SIZE], int format){
 
-
-
-	extern int MYID, NPROCX, NPROCY, NPROCZ;
-	extern int NX, NY, NZ, NPROC, IDX, IDY, IDZ, VERBOSE;
+	extern int MYID, NPROCX, NPROCY, NPROCZ, NXG, NYG, NZG, NX, NY, NZ, NPROC, IDX, IDY, IDZ;
 	extern FILE *FP;
-
 
 	char file[STRING_SIZE];
 	FILE *fp[NPROCY_MAX][NPROCX_MAX][NPROCZ_MAX], *fpout;
 	int i, j, k, ip, jp, kp;
 	float a;
-	
 
 	if ((NPROCX>NPROCX_MAX)||(NPROCY>NPROCY_MAX)||(NPROCZ>NPROCZ_MAX))
 		err(" mergemod.c: constant expression NPROC?_MAX < NPROC? ");
-
 	
-	if (VERBOSE) printf(" PE %d starts merge of %d model files \n",MYID,NPROC);
-
 	fprintf(FP," writing merged model file to  %s \n",modfile);
 	fpout=fopen(modfile,"w");
-
 
 	for (kp=0;kp<=NPROCZ-1; kp++)
 	    for (ip=0;ip<=NPROCX-1; ip++)
@@ -58,10 +49,6 @@ void mergemod(char modfile[STRING_SIZE], int format){
       		fp[jp][ip][kp]=fopen(file,"r");
       		if (fp[jp][ip][kp]==NULL) err("mergemod.c: can't read modfile !"); 
      	 }
-
-	//fprintf(FP," ... finished. \n");
-
-
 
 	fprintf(FP," Copying...");
 
@@ -85,13 +72,6 @@ void mergemod(char modfile[STRING_SIZE], int format){
       	}
       	
 	fclose(fpout);
-		
-	/*fprintf(FP," Use \n");
-	fprintf(FP," xmovie n1=%d n2=%d < %s loop=1 label1=Y label2=X title=%%g \n",
-		((NYG-1)/IDY)+1,((NXG-1)/IDY)+1,modfile);
-	fprintf(FP," to visualize model. \n");*/
-
 
 }
-
 

@@ -96,6 +96,9 @@ float ***  taus, float ***  taup, float *  eta){
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
+#ifdef HDF5
+	if (MYID==0) mergemod_hdf5(modfile);
+#endif
 	if (MYID==0) mergemod(modfile,3);
          if(L)	free_vector(pts,1,L);
 }

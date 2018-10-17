@@ -4,7 +4,7 @@
 "Domain Decomposition" : "comment",
 			"NPROCX" : "2",
 			"NPROCY" : "2",
-			"NPROCZ" : "2",
+			"NPROCZ" : "4",
 
 "3-D Grid" : "comment",
 			"NX" : "160",

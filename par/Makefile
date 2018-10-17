@@ -22,11 +22,13 @@ else
 endif
 
 .PHONY: install
-install: clean-bin ifos3d
+install: ifos3d
+
+.PHONY: cleanall 
+cleanall: clean-bin clean
 
 .PHONY: clean
 clean: 
-	rm -rf ../bin/*
 	$(MAKE) -C ../libcseife clean
 	$(MAKE) -C ../src/ clean
 

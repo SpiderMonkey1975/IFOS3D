@@ -46,24 +46,18 @@ void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int itera
 	fpmod2=fopen(modfile2,"w");
 	fpmod3=fopen(modfile3,"w");
 	
-	
 	for (k=1;k<=nz;k++){
-		for (i=1;i<=nx;i++){	
-			for (j=1;j<=ny;j++){
+        for (i=1;i<=nx;i++){	
+	for (j=1;j<=ny;j++){
 
-			vp=sqrt(pi[j][i][k]/rho[j][i][k]);
-			vs=sqrt(u[j][i][k]/rho[j][i][k]);
-			
+   	    vp=sqrt(pi[j][i][k]/rho[j][i][k]);
+	    vs=sqrt(u[j][i][k]/rho[j][i][k]);
 			  
-			fwrite(&vp, sizeof(float), 1,fpmod1);
-			fwrite(&vs, sizeof(float), 1,fpmod2);
-			fwrite(&rho[j][i][k], sizeof(float), 1,fpmod3);
+	    fwrite(&vp, sizeof(float), 1,fpmod1);
+	    fwrite(&vs, sizeof(float), 1,fpmod2);
+	    fwrite(&rho[j][i][k], sizeof(float), 1,fpmod3);
 	
-			}
-		}
-	}
-	
-	
+	}}}
 
 	fclose(fpmod1);
 	fclose(fpmod2);
@@ -72,10 +66,15 @@ void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int itera
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(MYID==0){
 		sprintf(modfile4,"%s.vp_it%d",MOD_OUT_FILE,iteration);
-		mergemod(modfile4,3);
 		sprintf(modfile5,"%s.vs_it%d",MOD_OUT_FILE,iteration);
-		mergemod(modfile5,3);
 		sprintf(modfile6,"%s.rho_it%d",MOD_OUT_FILE,iteration);
+#ifdef HDF5
+		mergemod_hdf5(modfile4);
+		mergemod_hdf5(modfile5);
+		mergemod_hdf5(modfile6);
+#endif
+		mergemod(modfile4,3);
+		mergemod(modfile5,3);
 		mergemod(modfile6,3);
 	}
 	MPI_Barrier(MPI_COMM_WORLD);

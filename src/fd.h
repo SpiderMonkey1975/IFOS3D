@@ -104,8 +104,10 @@ float *** taus, float *** taup);
 void matcopy_acoustic(float *** rho, float *** pi);
 
 void merge(int nsnap, int type);
+void merge_hdf5(int nsnap, int type);
 
 void mergemod(char modfile[STRING_SIZE], int format);
+void mergemod_hdf5(char modfile[STRING_SIZE]);
 
 void readmod(float  ***  rho, float ***  pi, float ***  u, 
 float ***  taus, float ***  taup, float *  eta);

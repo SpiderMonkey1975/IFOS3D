@@ -24,14 +24,12 @@
 #include "fd.h"
 #include "globvar.h"      /* definition of global variables  */
 
-
 int main(int argc, char **argv) {
 
 	int nsnap;
 	char *fileinp="";
 	//FILE *FP;
 	fileinp = argv[1];
-
 
 	if ((FP=fopen(fileinp,"r"))==NULL) {
 		err(" Opening input file failed.");
@@ -53,8 +51,6 @@ int main(int argc, char **argv) {
 
 	}
 
-
-
 	NXG=NX;
 	NYG=NY;
 	NZG=NZ;
@@ -66,6 +62,40 @@ int main(int argc, char **argv) {
 
 	FP=stdout;
 
+#ifdef HDF5
+	switch (SNAP) {
+		case 1 : /*particle velocity*/
+			merge_hdf5(nsnap,1);
+			merge_hdf5(nsnap,2);
+			merge_hdf5(nsnap,3);
+			break;
+
+		case 2 : /*pressure */
+			merge_hdf5(nsnap,6);
+			break;
+
+		case 4 : /*particle velocity*/
+			merge_hdf5(nsnap,1);
+			merge_hdf5(nsnap,2);
+			merge_hdf5(nsnap,3);
+
+		case 3 :/*curl and divergence energy*/
+			merge_hdf5(nsnap,4);
+			merge_hdf5(nsnap,5);
+			break;
+
+		case 5 :/*Gradient/Model*/
+			merge_hdf5(0,7);
+			merge_hdf5(0,8);
+			merge_hdf5(0,9);
+			break;
+
+		default :
+			warning(" snapmerge: cannot identify content of snapshot !");
+			break;
+
+	}
+#else
 	switch (SNAP) {
 		case 1 : /*particle velocity*/
 
@@ -99,7 +129,7 @@ int main(int argc, char **argv) {
 			break;
 
 	}
-
+#endif
 	return 0;
 
 }

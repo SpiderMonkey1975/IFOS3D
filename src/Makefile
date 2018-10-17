@@ -14,18 +14,19 @@ include ../compilers.inc
 
 LFLAGS=
 ifeq ($(NONCRAY),1)
-  LFLAGS+=-L${FFTW_LIB}  
+  LFLAGS+=-L${FFTW_LIB} -L${HDF5_LIB} 
 endif
 LFLAGS+=-lm -lcseife
 SFLAGS=-L./../libcseife 
-IFLAGS=-I./../libcseife
+IFLAGS=-I./../libcseife -I${HDF5_ROOT}/include
 
+CPPFLAGS=-DHDF5
 
 # after this line, no further editing should be necessary
 # --------------------------------------------------------
 
 .c.o:
-	$(CC) -c  $(CFLAGS) $< $(IFLAGS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< $(IFLAGS)
 
 SNAPMERGE_OBJ = $(SNAPMERGE_SCR:%.c=%.o)
 
@@ -54,7 +55,9 @@ IFOS_UTIL = \
 		info.c \
 		initproc.c \
 		merge.c \
+		merge_hdf5.c \
 		mergemod.c \
+		mergemod_hdf5.c \
 		note.c \
 		outseis.c \
 		output_source_signal.c \

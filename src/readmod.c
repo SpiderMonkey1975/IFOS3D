@@ -64,8 +64,6 @@ float ***  taus, float ***  taup, float *  eta){
 		sumpi=sumpi+((ws*ws*pts[l]*pts[l]*tp)/(1.0+ws*ws*pts[l]*pts[l]));
 	}
 
-		
-
 	   fprintf(FP,"\n...reading model information from model-files...\n");
 
 	   fprintf(FP,"\t P-wave velocities:\n\t %s.vp\n\n",MFILE);
@@ -84,17 +82,6 @@ float ***  taus, float ***  taup, float *  eta){
 	   fp_rho=fopen(filename,"r");
 	   if (fp_rho==NULL) err(" Could not open model file for densities ! ");
 
-/*	   fprintf(FP,"\t Qp:\n\t %s.qp\n\n",MFILE);
-	   sprintf(filename,"%s.qp",MFILE);
-	   fp_qp=fopen(filename,"r");
-	   if (fp_qp==NULL) err(" Could not open model file for Qp-values ! ");
-
-	   fprintf(FP,"\t Qs:\n\t %s.qs\n\n",MFILE);
-	   sprintf(filename,"%s.qs",MFILE);
-	   fp_qs=fopen(filename,"r");
-	   if (fp_qs==NULL) err(" Could not open model file for Qs-values ! ");
-*/	   
-
 	/* loop over global grid */
 		for (k=1;k<=NZG;k++){ 
 			for (i=1;i<=NXG;i++){
@@ -103,9 +90,6 @@ float ***  taus, float ***  taup, float *  eta){
 				vp=readdsk(fp_vp, format);
 				vs=readdsk(fp_vs, format);
 				rhov=readdsk(fp_rho , format);
-				/*qp=readdsk(fp_qp, format);
-				qs=readdsk(fp_qs, format);*/
-				
 				
 				muv=vs*vs*rhov/(1.0+sumu);
 				piv=vp*vp*rhov/(1.0+sumpi);
@@ -126,40 +110,15 @@ float ***  taus, float ***  taup, float *  eta){
 					u[jj][ii][kk]=muv;
 					rho[jj][ii][kk]=rhov;
 					pi[jj][ii][kk]=piv;
-					
 			
 				}
 				}
 			}
 		}
 
-
-
-
 	fclose(fp_vp);
 	fclose(fp_vs);
 	fclose(fp_rho);
-/*	fclose(fp_qp);
-	fclose(fp_qs);*/
-	
-	
-	/* each PE writes his model to disk */
-	   
-	   
-	/*sprintf(filename,"%s.IFOS.pwavemod",MFILE);
-	writemod(filename,pwavemod,3);
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (MYID==0) mergemod(filename,3);
-	
-	sprintf(filename,"%s.IFOS.swavemod",MFILE);
-	writemod(filename,swavemod,3);
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (MYID==0) mergemod(filename,3); 
-	
-	sprintf(filename,"%s.IFOS.rho",MFILE);
-	writemod(filename,rho,3);
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (MYID==0) mergemod(filename,3);*/
 
 	free_vector(pts,1,L);
 }
