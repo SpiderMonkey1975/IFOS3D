@@ -26,74 +26,91 @@
 #include "fd.h"
 #include <hdf5.h>
 
-void mergemod_hdf5(char modfile[STRING_SIZE]){
+void mergemod_hdf5(char modfile[STRING_SIZE], char dsetname[10], float ***val){
 
-     extern int MYID, NPROCX, NPROCY, NPROCZ, NXG, NYG, NZG, NX, NY, NZ, NPROC, IDX, IDY, IDZ;
-     extern FILE *FP;
+     extern int POS[4], NXG, NYG, NZG, NX, NY, NZ;
 
      char file[STRING_SIZE], filename[STRING_SIZE];
-     FILE *fp_in;
-     int i, j, k, ip, jp, kp;
-     float *a;
+     int i,j,k,ind;
+     float *buf;
 
-     hid_t fpout, dset, dspace, mspace;
+     hid_t fpout, dset, dspace, mspace, plist;
      hsize_t dims[3], offset[3], count[3], block[3], stride[3];
      herr_t status;
 
-     if ((NPROCX>NPROCX_MAX)||(NPROCY>NPROCY_MAX)||(NPROCZ>NPROCZ_MAX))
-	err(" mergemod_hdf5.c: constant expression NPROC?_MAX < NPROC? ");
-    
-     sprintf( filename, "%s.h5", modfile ); 
-     fprintf( FP, " writing merged model file to  %s \n", filename );
+ /**
+  ** Strip off the halo rows and columns from the input data array.
+  **---------------------------------------------------------------*/
+     buf = (float *) malloc( sizeof(float)*NX*NY*NZ );
 
-  /* Create the new HDF5 output file and dataset */
-     fpout = H5Fcreate( filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+     ind = 0;
+     for ( k=0; k<NZ; k++ ) {
+     for ( i=0; i<NX; i++ ) {
+     for ( j=0; j<NY; j++ ) {
+         buf[ind] = val[j+1][i+1][k+1];
+         ind++;
+     }}}
 
+ /**
+  ** Create a new HDF5 and enable parallel I/O on it.
+  **-------------------------------------------------*/
+     sprintf( filename, "%s_new.h5", modfile ); 
+
+     plist = H5Pcreate( H5P_FILE_ACCESS );
+     H5Pset_fapl_mpio( plist, MPI_COMM_WORLD, MPI_INFO_NULL );
+     fpout = H5Fcreate( filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist );
+     status = H5Pclose( plist );
+
+ /**
+  ** Define the 3D dataset to be written into the new HDF5 file. Remember that:
+  **   Y -> vertical direction into the ground
+  **   X -> horizontal direction along the ground (parallel to your p.o.v) 
+  **   Z -> horizontal direction along the ground (away from you)
+  **---------------------------------------------------------------------------*/
      dims[0] = NYG;
      dims[1] = NXG;
      dims[2] = NZG;
      dspace = H5Screate_simple( 3, dims, NULL );
-     dset = H5Dcreate2( fpout, "data", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 
-     count[0] = NY;
-     count[1] = NX;
-     count[2] = NZ;
-     mspace = H5Screate_simple( 3, count, NULL );
+     block[0] = NY;
+     block[1] = NX;
+     block[2] = NZ;
+     mspace = H5Screate_simple( 3, block, NULL );
 
-     a = (float *) malloc( NY*NX*NZ*sizeof(float) );
+     plist = H5Pcreate( H5P_DATASET_CREATE );
+     status = H5Pset_chunk( plist, 3, block );
+     dset = H5Dcreate( fpout, dsetname, H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT, plist, H5P_DEFAULT );
+     status = H5Pclose( plist );
+     status = H5Sclose( dspace );
 
+ /**
+  ** Each MPI task then writes its data into the new HDF5 file concurrently
+  **------------------------------------------------------------------------*/
      for ( k=0; k<3; k++ ) {
          stride[k] = 1;
-         block[k] = 1;
+         count[k] = 1;
      }
 
-     for (kp=0;kp<=NPROCZ-1; kp++) {
-     for (ip=0;ip<=NPROCX-1; ip++) {
-     for (jp=0;jp<=NPROCY-1; jp++) {
+     offset[0] = POS[2]*NY;
+     offset[1] = POS[1]*NX;
+     offset[2] = POS[3]*NZ;
+     dspace = H5Dget_space( dset );
+     status = H5Sselect_hyperslab( dspace, H5S_SELECT_SET, offset, stride, count, block );
+       
+     plist = H5Pcreate( H5P_DATASET_XFER );
+     status = H5Pset_dxpl_mpio( plist, H5FD_MPIO_COLLECTIVE );     
+     status = H5Dwrite( dset, H5T_NATIVE_FLOAT, mspace, dspace, plist, buf );
 
-      	sprintf(file,"%s.%i.%i.%i",modfile,ip,jp,kp);
-      	fp_in = fopen(file,"r");
-      	if (fp_in==NULL) err("mergemod_hdf5.c: can't read modfile !"); 
-
-        fread( a, sizeof(float), NY*NX*NZ, fp_in );	
-
-        offset[0] = jp*NY;
-        offset[1] = ip*NX;
-        offset[2] = kp*NZ;
-        status = H5Sselect_hyperslab( dspace, H5S_SELECT_SET, offset, stride, count, block );
-            
-        status = H5Dwrite( dset, H5T_NATIVE_FLOAT, mspace, dspace, H5P_DEFAULT, a );
-
-        fclose( fp_in );
-     }}}
-
-     free( a );
-     a = NULL;
-
-     status = H5Sclose( mspace );
+ /**
+  ** Clean up
+  **----------*/
      status = H5Dclose( dset );
      status = H5Sclose( dspace );
+     status = H5Sclose( mspace );
+     status = H5Pclose( plist );
      status = H5Fclose( fpout );
 
+     free( buf );
+     buf = NULL;
 }
 

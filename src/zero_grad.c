@@ -38,3 +38,4 @@ void zero_grad(int NX, int NY, int NZ, float *** grad1, float *** grad2, float *
     }
 
 }
+

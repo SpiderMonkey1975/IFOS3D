@@ -83,3 +83,4 @@ void residual(float **sectiondata, float **sectiondataf, float **section, float 
 
 
 }
+

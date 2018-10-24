@@ -45,3 +45,4 @@ void cpmodel(int nx, int ny, int nz, float ***rho, float ***pi, float ***u,float
 		}
 		
 }
+

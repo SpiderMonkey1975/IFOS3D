@@ -169,3 +169,4 @@ void gradient_F(int nx,int ny,int nz,float **** fvx,float **** fvy,float **** fv
 	
 
 }
+

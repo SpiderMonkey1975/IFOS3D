@@ -16,9 +16,9 @@ LFLAGS=
 ifeq ($(NONCRAY),1)
   LFLAGS+=-L${FFTW_LIB} -L${HDF5_LIB} 
 endif
-LFLAGS+=-lm -lcseife
+LFLAGS+=-lm -lcseife -L/opt/cray/pe/hdf5-parallel/1.10.1.1/CRAY/8.6/lib -lhdf5_parallel -lhdf5
 SFLAGS=-L./../libcseife 
-IFLAGS=-I./../libcseife -I${HDF5_ROOT}/include
+IFLAGS=-I./../libcseife -I/opt/cray/pe/hdf5-parallel/1.10.1.1/CRAY/8.6/include
 
 CPPFLAGS=-DHDF5
 

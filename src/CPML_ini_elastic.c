@@ -70,4 +70,3 @@ void CPML_ini_elastic(int * xb, int * yb, int * zb){
 
 }
 
-	

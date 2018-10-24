@@ -26,37 +26,57 @@
 
 #include "fd.h"
 
-void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int iteration){
+void outmod(float ***rho, float ***pi,float ***u, int iteration){
 
 	extern int POS[4];
 	extern char  MOD_OUT_FILE[STRING_SIZE];
 	FILE *fpmod1, *fpmod2, *fpmod3;
-	extern int MYID;
+	extern int MYID, NX, NY, NZ;
 
 	int i,j,k;
 	char modfile1[STRING_SIZE],modfile2[STRING_SIZE],modfile3[STRING_SIZE], modfile4[STRING_SIZE];
 	char modfile5[STRING_SIZE],modfile6[STRING_SIZE];
-	float vp,vs;
+	float ***vp, ***vs;
+#ifdef HDF5
+        char dsetname[10];
+#endif
+
+        vs = f3tensor(0,NY+1,0,NX+1,0,NZ+1);
+        vp = f3tensor(0,NY+1,0,NX+1,0,NZ+1);
+
+        for (k=1;k<=NZ;k++){
+        for (i=1;i<=NX;i++){
+        for (j=1;j<=NY;j++){
+            vp[j][i][k] = sqrt(pi[j][i][k]/rho[j][i][k]);
+            vs[j][i][k] = sqrt(u[j][i][k]/rho[j][i][k]);
+        }}}
 
 	sprintf(modfile1,"%s.vp_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
 	sprintf(modfile2,"%s.vs_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
 	sprintf(modfile3,"%s.rho_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
+	sprintf(modfile4,"%s.vp_it%d",MOD_OUT_FILE,iteration);
+	sprintf(modfile5,"%s.vs_it%d",MOD_OUT_FILE,iteration);
+	sprintf(modfile6,"%s.rho_it%d",MOD_OUT_FILE,iteration);
+
+#ifdef HDF5
+        sprintf( dsetname, "vp" );
+	mergemod_hdf5( modfile4, dsetname, vp );
+        sprintf( dsetname, "vs" );
+	mergemod_hdf5( modfile5, dsetname, vs );
+        sprintf( dsetname, "rho" );
+	mergemod_hdf5( modfile6, dsetname, rho );
+#endif
 	
 	fpmod1=fopen(modfile1,"w");
 	fpmod2=fopen(modfile2,"w");
 	fpmod3=fopen(modfile3,"w");
 	
-	for (k=1;k<=nz;k++){
-        for (i=1;i<=nx;i++){	
-	for (j=1;j<=ny;j++){
-
-   	    vp=sqrt(pi[j][i][k]/rho[j][i][k]);
-	    vs=sqrt(u[j][i][k]/rho[j][i][k]);
-			  
-	    fwrite(&vp, sizeof(float), 1,fpmod1);
-	    fwrite(&vs, sizeof(float), 1,fpmod2);
+	for (k=1;k<=NZ;k++){
+        for (i=1;i<=NX;i++){	
+	for (j=1;j<=NY;j++){
+	    fwrite(&vp[j][i][k], sizeof(float), 1,fpmod1);
+	    fwrite(&vs[j][i][k], sizeof(float), 1,fpmod2);
 	    fwrite(&rho[j][i][k], sizeof(float), 1,fpmod3);
-	
 	}}}
 
 	fclose(fpmod1);
@@ -65,14 +85,6 @@ void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int itera
 	
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(MYID==0){
-		sprintf(modfile4,"%s.vp_it%d",MOD_OUT_FILE,iteration);
-		sprintf(modfile5,"%s.vs_it%d",MOD_OUT_FILE,iteration);
-		sprintf(modfile6,"%s.rho_it%d",MOD_OUT_FILE,iteration);
-#ifdef HDF5
-		mergemod_hdf5(modfile4);
-		mergemod_hdf5(modfile5);
-		mergemod_hdf5(modfile6);
-#endif
 		mergemod(modfile4,3);
 		mergemod(modfile5,3);
 		mergemod(modfile6,3);
@@ -80,5 +92,9 @@ void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int itera
 	MPI_Barrier(MPI_COMM_WORLD);
 	remove(modfile1);
 	remove(modfile2);
-	remove(modfile3);	
+	remove(modfile3);
+
+        free_f3tensor(vs,0,NY+1,0,NX+1,0,NZ+1);
+        free_f3tensor(vp,0,NY+1,0,NX+1,0,NZ+1);
+	
 }

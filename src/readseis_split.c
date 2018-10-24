@@ -64,3 +64,4 @@ void readseis_split(int ishot, float **section, int ntr,int *rnum_loc, int ns, i
     }
    // fprintf(FP," readseis_split finished\n");  
 }
+

@@ -80,8 +80,5 @@ void readinv(float *finv, int *nf, int *groupnum,int *itpergroup,int nfmax){
 	MPI_Bcast(&twin,2,MPI_FLOAT,0,MPI_COMM_WORLD);
 	*/
 	
-	
-	
-		
-
 }
+

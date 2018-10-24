@@ -107,7 +107,7 @@ void merge(int nsnap, int type);
 void merge_hdf5(int nsnap, int type);
 
 void mergemod(char modfile[STRING_SIZE], int format);
-void mergemod_hdf5(char modfile[STRING_SIZE]);
+void mergemod_hdf5( char modfile[STRING_SIZE], char dsetname[10], float *** val );
 
 void readmod(float  ***  rho, float ***  pi, float ***  u, 
 float ***  taus, float ***  taup, float *  eta);
@@ -395,7 +395,7 @@ void modelupdate(int nx, int ny, int nz, float ***gradlam, float ***gradmu, floa
 void zero_invers(int NX, int NY, int NZ, float **** Ffvx, float **** Ffvy, float **** Ffvz, float **** Ffivx, float **** Ffivy, float **** Ffivz, float **** Fbvx, float **** Fbvy, float **** Fbvz, float **** Fbivx, float **** Fbivy, float **** Fbivz,int nfmax, int ntr_hess);
 void precon_grad(int nx,int ny,int nz, float ***grad1, float ***grad2,float ***grad3, int nsrc, float **  srcpos, int ntr_glob, int **recpos, float finv, int iteration,int cdf);
 void outgrad(int nx,int ny,int nz,float ***grad1, float ***grad2,float ***grad3, float finv, int iteration, char outfile[STRING_SIZE]);
-void outmod(int nx,int ny,int nz,float ***rho, float ***pi,float ***u, int iteration);
+void outmod(float ***rho, float ***pi,float ***u, int iteration);
 void steplength(float *L2, float * step, int iteration, int it_group);
 void zero_grad(int NX, int NY, int NZ, float *** grad1, float *** grad2, float *** grad3);
 void cpmodel(int nx, int ny, int nz, float ***rho, float ***pi, float ***u,float  ***  testrho, float ***  testpi, float ***  testu);

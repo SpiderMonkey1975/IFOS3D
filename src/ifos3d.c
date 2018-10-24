@@ -544,7 +544,7 @@ MPI_Barrier(MPI_COMM_WORLD);
 	else model(rho,pi,u,taus,taup,eta);	
 	/*model_gauss(rho,pi,u,taus,taup,eta);*/
 	/*model2_5(rho,pi,u,taus,taup);*/
-	outmod(NX,NY,NZ,rho,pi,u,0);
+	outmod(rho,pi,u,0);
 	/*smooth(NX,NY,NZ,pi,testpi);
 	smooth(NX,NY,NZ,u,testu);
 	smooth(NX,NY,NZ,rho,testrho);*/
@@ -1138,7 +1138,7 @@ CPML_coeff(K_x,alpha_prime_x,a_x,b_x,K_x_half,alpha_prime_x_half,a_x_half,b_x_ha
 			modelupdate(NX,NY,NZ,grad1,grad2,grad3,rho,pi,u,bfgsmod1,step[3],beta,it_group);
 					
 			if(MYID==0)fprintf(FP,"\n Modeloutput \n");
-			outmod(NX,NY,NZ,rho,pi,u,iteration);
+			outmod(rho,pi,u,iteration);
 			
 			if(MYID==0){
 				time4=MPI_Wtime();

@@ -79,3 +79,4 @@ void filt_seis(float ** data,int ntr, int ns, float finv){
 	       
 	        free_dvector(seismogram,1,ns);
 }
+

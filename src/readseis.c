@@ -68,6 +68,5 @@ void readseis(int ishot, float **section, float **sectionf, int ntr, int ns, int
     fclose(fpdata);
     }
     //fprintf(FP," readseis finished\n");
-
-  
 }
+
