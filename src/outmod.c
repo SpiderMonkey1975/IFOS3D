@@ -35,7 +35,7 @@ void outmod(float ***rho, float ***pi,float ***u, int iteration){
 
 	int i,j,k;
 	char modfile1[STRING_SIZE],modfile2[STRING_SIZE],modfile3[STRING_SIZE], modfile4[STRING_SIZE];
-	char modfile5[STRING_SIZE],modfile6[STRING_SIZE];
+	char modfile5[STRING_SIZE],modfile6[STRING_SIZE],hdf5_prefix[STRING_SIZE];
 	float ***vp, ***vs;
 #ifdef HDF5
         char dsetname[10];
@@ -51,6 +51,18 @@ void outmod(float ***rho, float ***pi,float ***u, int iteration){
             vs[j][i][k] = sqrt(u[j][i][k]/rho[j][i][k]);
         }}}
 
+
+#ifdef HDF5
+        sprintf( hdf5_prefix, "%s_iteration%d", MOD_OUT_FILE, iteration );
+
+        sprintf( dsetname, "vp" );
+	mergemod_hdf5( hdf5_prefix, dsetname, vp );
+        sprintf( dsetname, "vs" );
+	mergemod_hdf5( hdf5_prefix, dsetname, vs );
+        sprintf( dsetname, "rho" );
+	mergemod_hdf5( hdf5_prefix, dsetname, rho );
+#endif
+	
 	sprintf(modfile1,"%s.vp_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
 	sprintf(modfile2,"%s.vs_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
 	sprintf(modfile3,"%s.rho_it%d.%i.%i.%i",MOD_OUT_FILE,iteration,POS[1],POS[2],POS[3]);
@@ -58,15 +70,6 @@ void outmod(float ***rho, float ***pi,float ***u, int iteration){
 	sprintf(modfile5,"%s.vs_it%d",MOD_OUT_FILE,iteration);
 	sprintf(modfile6,"%s.rho_it%d",MOD_OUT_FILE,iteration);
 
-#ifdef HDF5
-        sprintf( dsetname, "vp" );
-	mergemod_hdf5( modfile4, dsetname, vp );
-        sprintf( dsetname, "vs" );
-	mergemod_hdf5( modfile5, dsetname, vs );
-        sprintf( dsetname, "rho" );
-	mergemod_hdf5( modfile6, dsetname, rho );
-#endif
-	
 	fpmod1=fopen(modfile1,"w");
 	fpmod2=fopen(modfile2,"w");
 	fpmod3=fopen(modfile3,"w");

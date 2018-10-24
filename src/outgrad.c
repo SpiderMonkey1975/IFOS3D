@@ -33,7 +33,7 @@ void outgrad(int nx,int ny,int nz,float ***grad1, float ***grad2,float ***grad3,
 	char gradfile1[STRING_SIZE],gradfile2[STRING_SIZE],gradfile3[STRING_SIZE];
 	char gradfile4[STRING_SIZE],gradfile5[STRING_SIZE],gradfile6[STRING_SIZE];
 #ifdef HDF5
-        char dsetname[10];
+        char dsetname[10], hdf5_prefix[STRING_SIZE];
 #endif
 	
 	sprintf(gradfile1,"%s.vp_%4.2fHz_it%d.%i.%i.%i",outfile,finv,iteration,POS[1],POS[2],POS[3]);
@@ -61,12 +61,13 @@ void outgrad(int nx,int ny,int nz,float ***grad1, float ***grad2,float ***grad3,
 	sprintf(gradfile5,"%s.vs_%4.2fHz_it%d",outfile,finv,iteration);
 	sprintf(gradfile6,"%s.rho_%4.2fHz_it%d",outfile,finv,iteration);
 #ifdef HDF5
+        sprintf( hdf5_prefix, "%s_%4.2fHz_iteration%d", outfile, finv, iteration );
         sprintf( dsetname, "grad_vp" );
-	mergemod_hdf5( gradfile4, dsetname, grad1 );
+	mergemod_hdf5( hdf5_prefix, dsetname, grad1 );
         sprintf( dsetname, "grad_vs" );
-	mergemod_hdf5( gradfile5, dsetname, grad2 );
+	mergemod_hdf5( hdf5_prefix, dsetname, grad2 );
         sprintf( dsetname, "grad_rho" );
-	mergemod_hdf5( gradfile6, dsetname, grad3 );
+	mergemod_hdf5( hdf5_prefix, dsetname, grad3 );
 #endif
 	if(MYID==0){
 		mergemod(gradfile4,3);

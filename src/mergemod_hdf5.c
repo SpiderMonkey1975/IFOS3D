@@ -24,11 +24,12 @@
  *  ----------------------------------------------------------------------*/
 
 #include "fd.h"
+#include <unistd.h>
 #include <hdf5.h>
 
 void mergemod_hdf5(char modfile[STRING_SIZE], char dsetname[10], float ***val){
 
-     extern int POS[4], NXG, NYG, NZG, NX, NY, NZ;
+     extern int POS[4], MYID, NXG, NYG, NZG, NX, NY, NZ;
 
      char file[STRING_SIZE], filename[STRING_SIZE];
      int i,j,k,ind;
@@ -52,13 +53,24 @@ void mergemod_hdf5(char modfile[STRING_SIZE], char dsetname[10], float ***val){
      }}}
 
  /**
-  ** Create a new HDF5 and enable parallel I/O on it.
-  **-------------------------------------------------*/
-     sprintf( filename, "%s_new.h5", modfile ); 
+  ** Check if the HDF5 file already exists.  If so, open it.  If not,
+  ** create a new HDF5 file with parallel I/O access enabled.
+  **-----------------------------------------------------------------*/
+     sprintf( filename, "%s.h5", modfile ); 
 
      plist = H5Pcreate( H5P_FILE_ACCESS );
      H5Pset_fapl_mpio( plist, MPI_COMM_WORLD, MPI_INFO_NULL );
-     fpout = H5Fcreate( filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist );
+
+     if ( access( filename, F_OK ) != -1 ) {
+        fpout = H5Fopen( filename, H5F_ACC_RDWR, plist );
+     } else {
+        fpout = H5Fcreate( filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist );
+     }
+
+     if ( fpout<0 ) {
+        if (MYID==0) { printf( "\n\nERROR: could not create %s\n\n", filename ); }
+        i = MPI_Abort( MPI_COMM_WORLD, k );
+     }
      status = H5Pclose( plist );
 
  /**
@@ -80,6 +92,10 @@ void mergemod_hdf5(char modfile[STRING_SIZE], char dsetname[10], float ***val){
      plist = H5Pcreate( H5P_DATASET_CREATE );
      status = H5Pset_chunk( plist, 3, block );
      dset = H5Dcreate( fpout, dsetname, H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT, plist, H5P_DEFAULT );
+     if ( dset<0 ) {
+        if (MYID==0) { printf( "\n\nERROR: could not create HDF5 dataset %s\n\n", dsetname ); }
+        i = MPI_Abort( MPI_COMM_WORLD, k );
+     }
      status = H5Pclose( plist );
      status = H5Sclose( dspace );
 
